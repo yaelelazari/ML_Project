@@ -43,6 +43,24 @@ Do not require intermediate cleaned CSV files such as `Xy_train_clean.csv` or `X
 
 ---
 
+## Current Course Reference Files
+
+The repository also includes supporting course/context files that should be used when writing explanations or choosing terminology:
+
+```text
+part b instructions.md
+ml_course_context_decisions_dt_nn.md
+```
+
+Use:
+
+- `part b instructions.md` as the official Part B assignment/instructions source.
+- `ml_course_context_decisions_dt_nn.md` as a curriculum-aligned reference for Bayesian decision theory, Decision Trees, and Neural Networks. It summarizes course lectures `MLclass5Decision.pdf`, `MLclass6DT.pdf`, and `MLclass7NN.pdf`.
+
+The course-context file is not a raw notebook input and should not be required to run the final notebook. It should guide explanations for Decision Trees, Neural Networks / MLP, and Bayesian / Naive Bayes concepts so the wording stays aligned with the course. If it conflicts with the official Part B instructions, follow the official instructions and mention the conflict.
+
+---
+
 ## Current Notebook State
 
 `Airline_Project_Part_B_Group3.ipynb` currently contains:
