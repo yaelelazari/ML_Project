@@ -53,13 +53,12 @@ Do not require intermediate cleaned CSV files such as `Xy_train_clean.csv` or `X
 4. Automatic target-column detection from the raw training file.
 5. Corrected Part A cleaning/preprocessing integrated directly into the notebook.
 6. Train/validation split.
-7. Placeholder Markdown section for Decision Tree.
+7. Implemented Decision Tree section.
 8. Implemented Neural Network / MLP section.
 9. Placeholder sections for K-Means, Naive Bayes, model comparison, final model, and final prediction export.
 
-The notebook currently implements only the MLP model section. It does **not** yet implement:
+The notebook currently implements the Decision Tree and MLP model sections. It does **not** yet implement:
 
-- Decision Tree
 - K-Means
 - Naive Bayes
 - Model comparison
@@ -67,6 +66,12 @@ The notebook currently implements only the MLP model section. It does **not** ye
 - Final prediction export
 
 Do not implement those remaining model sections unless explicitly requested.
+
+Decision Tree section cleanup still needed later:
+
+- Remove the draft Markdown note `shi changed the code below` / `שי שינתה את הקוד למטה`.
+- Remove or rewrite the placeholder blockquote text `Add blockquote`.
+- Consider making the written conclusions fully dynamic or updating them after a full rerun.
 
 ---
 
@@ -248,9 +253,120 @@ X_test_final rows: 1000
 
 ---
 
+## Current Decision Tree Section
+
+Section 8, Decision Tree, is implemented.
+
+Important implementation details:
+
+- Uses only `X_train`, `X_valid`, `y_train`, and `y_valid`.
+- Does not use `X_test_final` for training, tuning, or validation.
+- Encodes the target as:
+
+```text
+neutral or dissatisfied -> 0
+satisfied -> 1
+```
+
+- Uses an sklearn `Pipeline` with a `ColumnTransformer`.
+- Numeric features are passed through without scaling.
+- Categorical features are encoded with `OneHotEncoder(handle_unknown="ignore")`.
+- The code defines helper functions `make_dt_preprocessor()` and `build_dt_pipeline()`.
+
+Full Decision Tree:
+
+```python
+DecisionTreeClassifier(random_state=42)
+```
+
+Saved notebook output for the full tree:
+
+```text
+Train Accuracy: 1.0000
+Validation Accuracy: 0.8478
+Validation Precision: 0.8216
+Validation Recall: 0.8321
+Validation F1: 0.8268
+```
+
+The full tree shows clear overfitting: perfect training performance and lower validation performance.
+
+Decision Tree tuning currently includes:
+
+- Pre-pruning scan over `max_depth` values 1 through 15.
+- Cost-complexity pruning using `cost_complexity_pruning_path`.
+- A combined scan over `max_depth` and sampled `ccp_alpha` values.
+
+Saved notebook tuning outputs:
+
+```text
+Best max_depth from pre-pruning scan: 8
+Validation Accuracy at best max_depth: 0.8761
+
+Best ccp_alpha from pruning scan: 0.000507
+Validation Accuracy at best ccp_alpha: 0.8883
+
+Combined scan:
+Optimal max_depth: 9
+Optimal ccp_alpha: 0.000500
+Validation Accuracy: 0.8878
+```
+
+The currently selected best tree is trained with:
+
+```python
+DecisionTreeClassifier(ccp_alpha=best_ccp_alpha, random_state=42)
+```
+
+Saved notebook output for the selected pruned tree:
+
+```text
+Train Accuracy: 0.9218
+Train Precision: 0.9297
+Train Recall: 0.8879
+Train F1: 0.9083
+
+Validation Accuracy: 0.8883
+Validation Precision: 0.8958
+Validation Recall: 0.8422
+Validation F1: 0.8682
+```
+
+Report-ready Decision Tree outputs currently included:
+
+- Full tree metrics table.
+- Full tree train/validation performance plot.
+- Generalization gap plot.
+- `max_depth` tuning plot.
+- Cost-complexity impurity plot.
+- Tree complexity plots by `ccp_alpha`.
+- Accuracy by `ccp_alpha` plot.
+- Combined `max_depth` and `ccp_alpha` scan output.
+- Selected pruned tree metrics table.
+- Comparison table between full and pruned tree.
+- Pruned tree visualization limited to depth 3.
+- Validation confusion matrix for the selected tree.
+- Manual decision-path example for one validation record.
+- Feature importance plot and top-feature table.
+- Hebrew conclusions and interpretations.
+
+Current manual decision-path example:
+
+```text
+Validation position: 10
+Original row index: 4267
+True label: Satisfied
+Prediction: Satisfied
+Correct classification: Yes
+```
+
+Plot display text is intentionally in English because Hebrew RTL rendering in Matplotlib is unreliable. Notebook Markdown explanations remain in Hebrew.
+
+---
+
 ## Current MLP / Neural Network Section
 
-Section 9, `????? ???????? / MLP`, is implemented.
+Section 9, Neural Network / MLP, is implemented.
 
 Important implementation details:
 
@@ -271,43 +387,71 @@ satisfied -> 1
 Default MLP:
 
 ```python
-MLPClassifier(random_state=42, max_iter=1000)
+MLPClassifier(random_state=42, max_iter=500)
 ```
 
-Compact tuning uses:
+Current tuning uses:
 
 ```python
-RandomizedSearchCV(
+GridSearchCV(
     cv=3,
     scoring="accuracy",
-    n_iter=12,
-    random_state=42,
+    n_jobs=-1,
+    return_train_score=True,
+    refit=True,
 )
 ```
 
-The tuned MLP search is intentionally compact for Colab runtime. The search MLP uses early stopping to avoid very long runs.
+The MLP tuning search compares predefined architectures and two alpha values. The search MLP uses early stopping to avoid very long runs.
+
+Current search space:
+
+```text
+hidden_layer_sizes:
+(25,), (50,), (100,), (150,),
+(50, 25), (100, 50), (150, 75), (200, 100),
+(50, 25, 10), (100, 50, 25)
+
+activation: relu
+alpha: 0.0001, 0.001
+learning_rate_init: 0.001
+```
 
 Current best tuned MLP configuration:
 
 ```text
 activation: relu
-hidden_layer_sizes: (100,)
-alpha: 0.01
-learning_rate_init: 0.01
+hidden_layer_sizes: (150, 75)
+alpha: 0.0001
+learning_rate_init: 0.001
 ```
 
-This means the selected network has one hidden layer with 100 neurons.
+This means the selected network has two hidden layers, with 150 neurons in the first hidden layer and 75 neurons in the second hidden layer.
 
-Current validation results for the tuned MLP:
+Current notebook Markdown records the tuned MLP results as:
 
 ```text
-Accuracy: 0.8906
-Precision: 0.8780
-Recall: 0.8702
-F1: 0.8741
+Train Accuracy: 0.9261
+Validation Accuracy: 0.8883
+Generalization gap: about 0.0378
+Best mean CV Accuracy: 0.8929
 ```
 
-The default MLP had very high training performance and lower validation performance, so the tuned MLP generalizes better.
+The default MLP Markdown records:
+
+```text
+Train Accuracy: 0.9933
+Train Precision: 0.9946
+Train Recall: 0.9901
+Train F1: 0.9923
+
+Validation Accuracy: 0.8822
+Validation Precision: 0.8747
+Validation Recall: 0.8524
+Validation F1: 0.8634
+```
+
+The notebook currently has no saved outputs for the MLP code cells, so these values should be verified after rerunning the notebook. The written conclusion is that the tuned MLP slightly improves validation accuracy and reduces overfitting compared with the default MLP.
 
 Report-ready MLP outputs currently included:
 
@@ -370,24 +514,21 @@ Rationale:
 
 Remaining model sections to add with Hebrew explanations:
 
-1. Decision Tree
-2. K-Means
-3. Naive Bayes
-4. Model comparison
-5. Final selected model
-6. Final prediction export
+1. K-Means
+2. Naive Bayes
+3. Model comparison
+4. Final selected model
+5. Final prediction export
 
-The Neural Network / MLP section is already implemented.
+The Decision Tree and Neural Network / MLP sections are already implemented.
 
 Required outputs for the report should include:
 
-- Metrics tables.
-- Hyperparameter tuning summaries.
-- Confusion matrices.
-- Tree visualization and feature importance for Decision Tree.
 - K-Means cluster-class comparison and visualization.
 - Naive Bayes predicted probabilities for one validation record.
 - Model comparison table.
+- Selected final model configuration.
+- Final validation confusion matrix for the selected model.
 - Final submission Excel file.
 
 ---
