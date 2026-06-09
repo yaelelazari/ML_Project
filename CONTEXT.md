@@ -53,19 +53,20 @@ Do not require intermediate cleaned CSV files such as `Xy_train_clean.csv` or `X
 4. Automatic target-column detection from the raw training file.
 5. Corrected Part A cleaning/preprocessing integrated directly into the notebook.
 6. Train/validation split.
-7. Placeholder Markdown sections for the required Part B model sections.
+7. Placeholder Markdown section for Decision Tree.
+8. Implemented Neural Network / MLP section.
+9. Placeholder sections for K-Means, Naive Bayes, model comparison, final model, and final prediction export.
 
-The notebook does **not** yet implement:
+The notebook currently implements only the MLP model section. It does **not** yet implement:
 
 - Decision Tree
-- MLP / Neural Network
 - K-Means
 - Naive Bayes
 - Model comparison
 - Final model
 - Final prediction export
 
-Do not implement those model sections unless explicitly requested.
+Do not implement those remaining model sections unless explicitly requested.
 
 ---
 
@@ -84,7 +85,7 @@ satisfied
 neutral or dissatisfied
 ```
 
-Future modeling should encode the target as binary only after the cleaning/splitting setup is clear. Recommended mapping:
+The MLP section encodes the target as binary with this mapping:
 
 ```python
 TARGET_MAP = {
@@ -247,6 +248,81 @@ X_test_final rows: 1000
 
 ---
 
+## Current MLP / Neural Network Section
+
+Section 9, `????? ???????? / MLP`, is implemented.
+
+Important implementation details:
+
+- Uses only `X_train`, `X_valid`, `y_train`, and `y_valid`.
+- Does not use `X_test_final` for training, tuning, or validation.
+- Encodes the target as:
+
+```text
+neutral or dissatisfied -> 0
+satisfied -> 1
+```
+
+- Uses an sklearn `Pipeline` so preprocessing is fitted only on the training data during training and cross-validation.
+- Numeric features are scaled with `StandardScaler`.
+- Categorical features are encoded with `OneHotEncoder(handle_unknown="ignore")`.
+- The preprocessed MLP input size is currently 33 features.
+
+Default MLP:
+
+```python
+MLPClassifier(random_state=42, max_iter=1000)
+```
+
+Compact tuning uses:
+
+```python
+RandomizedSearchCV(
+    cv=3,
+    scoring="accuracy",
+    n_iter=12,
+    random_state=42,
+)
+```
+
+The tuned MLP search is intentionally compact for Colab runtime. The search MLP uses early stopping to avoid very long runs.
+
+Current best tuned MLP configuration:
+
+```text
+activation: relu
+hidden_layer_sizes: (100,)
+alpha: 0.01
+learning_rate_init: 0.01
+```
+
+This means the selected network has one hidden layer with 100 neurons.
+
+Current validation results for the tuned MLP:
+
+```text
+Accuracy: 0.8906
+Precision: 0.8780
+Recall: 0.8702
+F1: 0.8741
+```
+
+The default MLP had very high training performance and lower validation performance, so the tuned MLP generalizes better.
+
+Report-ready MLP outputs currently included:
+
+- Default MLP metrics table.
+- MLP architecture summary table.
+- Cross-validation tuning results table.
+- Tuning plot.
+- Tuned MLP metrics table.
+- Tuned MLP confusion matrix.
+- Short Hebrew conclusions comparing default and tuned MLP.
+
+Plot display text is intentionally in English because Hebrew RTL rendering in Matplotlib is unreliable. Notebook Markdown explanations remain in Hebrew.
+
+---
+
 ## Train/Validation Split
 
 Part B requires splitting `Xy_train.csv` into training and validation sets.
@@ -282,7 +358,9 @@ Rationale:
 - Never change final test row order.
 - Never impute the target.
 - Keep all Markdown explanations, interpretations, and conclusions in Hebrew.
+- Markdown cells in the notebook are wrapped with RTL/right-align display markup.
 - Keep code in normal Python.
+- Plot titles, axis labels, legends, and class labels inside Matplotlib plots should be in English for readability.
 - Avoid long English explanations in Markdown cells.
 - Keep the solution clear enough to explain in class.
 
@@ -290,15 +368,16 @@ Rationale:
 
 ## Required Part B Modeling Sections To Add Later
 
-When modeling begins, add implementations and Hebrew explanations for:
+Remaining model sections to add with Hebrew explanations:
 
 1. Decision Tree
-2. Neural Network / MLP
-3. K-Means
-4. Naive Bayes
-5. Model comparison
-6. Final selected model
-7. Final prediction export
+2. K-Means
+3. Naive Bayes
+4. Model comparison
+5. Final selected model
+6. Final prediction export
+
+The Neural Network / MLP section is already implemented.
 
 Required outputs for the report should include:
 
