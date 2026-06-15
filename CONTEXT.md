@@ -74,25 +74,16 @@ The course-context file is not a raw notebook input and should not be required t
 7. Implemented Decision Tree section.
 8. Implemented Neural Network / MLP section.
 9. Implemented model comparison section.
-10. A provisional selected-model explanation in Section 11, currently choosing the optimized Decision Tree.
-11. A placeholder Section 12 for final retraining, predictions, and Excel export.
+10. Implemented selected-model section choosing the optimized Decision Tree.
+11. Implemented final retraining, prediction, validation, and Excel export section.
 
 The lecturer removed the K-Means and Naive Bayes requirements from the current working scope. The official `part b instructions.md` still includes those older requirements, but the lecturer update overrides them for the working notebook.
 
-The notebook currently implements the Decision Tree, MLP, and model comparison sections. Section 11 contains the current model-selection explanation, but the selection still has a highlighted reminder to confirm it after the lecturer's email. The notebook does **not** yet implement:
-
-- Final full-data retraining of the selected model
-- Final prediction export
+The notebook currently implements the Decision Tree, MLP, model comparison, selected-model, and final-prediction sections. Section 11 selects the optimized Decision Tree, and Section 12 retrains it on all cleaned training data and exports the final predictions.
 
 Do not reintroduce full K-Means or Naive Bayes sections unless explicitly requested. Section 10 now includes only a short conceptual answer explaining why supervised models (`Decision Tree` / `Neural Network`) are preferred over `K-Means` for this classification task, while the numerical comparison remains only between `Decision Tree` and `MLP`.
 
-Current draft reminders still present in the notebook:
-
-- Section 11 heading contains `<mark> לעדכן אחרי מייל משירי`.
-- Section 12 contains `<mark> אחרי שניצור קובץ חיזויים, צריך לעדכן <mark>`.
-- Remove these reminders only after the model choice is confirmed and the final prediction workflow is implemented.
-
-The old draft texts `shi changed the code below` and `Add blockquote` are no longer present.
+The previous draft reminders in Sections 11 and 12 have been removed. The old draft texts `shi changed the code below` and `Add blockquote` are also no longer present.
 
 All code-cell outputs are currently cleared from the saved notebook. A complete temporary execution was used for verification without writing generated outputs back into the submitted notebook.
 
@@ -600,31 +591,56 @@ Rationale:
 
 ---
 
-## Required Part B Sections To Add Later
+## Current Completion Status
 
-Remaining work:
+Implemented under the current lecturer-updated scope:
 
-1. Confirm the provisional Decision Tree choice after the lecturer's email and remove the highlighted reminder in Section 11.
-2. Retrain the confirmed final model on all cleaned training data.
-3. Generate predictions for `X_test_final` without changing its row count or order.
-4. Export and validate the final Excel prediction file.
-5. Replace the highlighted placeholder text in Section 12 with the actual completed results.
+1. Data loading, cleaning, feature engineering, and train/validation split.
+2. Decision Tree training, tuning, evaluation, visualization, and interpretation.
+3. MLP training, tuning, cross-validation, evaluation, and interpretation.
+4. Model comparison and selection of the optimized Decision Tree.
+5. Full-data retraining of the selected model.
+6. Prediction on `X_test_final` with row count and order preserved.
+7. Export and validation of the final Excel prediction file.
 
-The Decision Tree, Neural Network / MLP, and model comparison sections are already implemented.
+No additional notebook modeling section remains under the current scope. Final review and submission packaging are still required outside the implementation itself.
 
 Do not add full K-Means or Naive Bayes sections under the current lecturer-updated scope. The old official instructions still mention them, but the current working notebook follows the lecturer update that removed those sections.
 
-Required outputs still needed for the report include:
-
-- Confirmation of the final selected model after the pending lecturer clarification.
-- Final full-training and prediction summary.
-- Final submission Excel file.
+The final report should use the verified model-selection, confusion-matrix, full-training, and prediction-export results already produced by the notebook.
 
 ---
 
 ## Final Prediction File
 
-The final prediction file must:
+Section 12 is implemented and creates:
+
+```text
+airline_G3_ytest.xlsx
+```
+
+Implementation details:
+
+- Maps the full cleaned target with `TARGET_MAP`.
+- Builds a new Decision Tree pipeline using `best_combined_depth`, `best_combined_alpha`, `best_combined_split`, and `best_combined_leaf`.
+- Retrains on all `8998` cleaned training rows.
+- Predicts on all `1000` rows of `X_test_final`.
+- Uses `y test example.xlsx` to validate the required single-column structure, not its row count.
+- Writes one column named `target` with binary values 0/1.
+- Reads the exported Excel file back and compares it with the in-memory submission.
+
+Verified final file:
+
+```text
+Rows: 1000
+Columns: 1
+Column name: target
+Missing predictions: 0
+Predicted class 0: 573 rows (57.3%)
+Predicted class 1: 427 rows (42.7%)
+```
+
+The final prediction file:
 
 - Preserve the original order of rows in `X_test.csv`.
 - Have the same number of rows as `X_test.csv`.
@@ -635,13 +651,13 @@ The final prediction file must:
 target
 ```
 
-Required filename for Group 3 on the airline dataset:
+Required and generated filename for Group 3 on the airline dataset:
 
 ```text
 airline_G3_ytest.xlsx
 ```
 
-Before export, validate:
+The notebook validates:
 
 ```python
 assert len(submission) == len(test_raw)
@@ -653,12 +669,12 @@ assert set(submission["target"].unique()).issubset({0, 1})
 
 ## Latest Verification Status
 
-The current notebook was executed completely from top to bottom in a temporary copy after translating code-generated output to English.
+The current notebook was executed completely from top to bottom in a temporary copy after implementing Section 12.
 
 Verified:
 
 - Full execution completed successfully.
-- All 37 Markdown cells remained unchanged during the cosmetic output-language edit.
+- The notebook contains 38 Markdown cells and 38 code cells.
 - Preprocessing logic, model logic, data split, hyperparameters, and metrics remained unchanged.
 - No Hebrew appeared in executed code outputs.
 - Training rows after cleaning: `8998`.
@@ -666,6 +682,10 @@ Verified:
 - Final test rows: `1000`, with row count and order preserved.
 - Optimized Decision Tree validation Accuracy: `0.8917`.
 - Tuned MLP validation Accuracy: `0.8883`.
+- Section 12 retrained the optimized Decision Tree on all `8998` cleaned training rows.
+- `airline_G3_ytest.xlsx` was created successfully with `1000` rows and one `target` column.
+- Final test row count and order were preserved.
+- The exported Excel file matched the in-memory submission exactly.
 
 The temporary execution result was used only for verification. The saved notebook currently contains no stored code-cell outputs.
 
@@ -673,7 +693,7 @@ The temporary execution result was used only for verification. The saved noteboo
 
 ## Git / Branch Notes
 
-At the time of this context update, the repository is on branch `main`, tracking `origin/main`. A branch named `elad` was used earlier for separate work, so always run `git status -sb` before committing or pushing.
+At the time of this context update, the repository is on branch `elad`, tracking `origin/elad`. Always run `git status -sb` before committing or pushing.
 
 The local reference notebook:
 
