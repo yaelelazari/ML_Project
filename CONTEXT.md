@@ -56,22 +56,27 @@ Do not require intermediate cleaned CSV files such as `Xy_train_clean.csv` or `X
 7. Implemented Decision Tree section.
 8. Implemented Neural Network / MLP section.
 9. Implemented model comparison section.
-10. Placeholder sections for final selected model and final prediction export.
+10. A provisional selected-model explanation in Section 11, currently choosing the optimized Decision Tree.
+11. A placeholder Section 12 for final retraining, predictions, and Excel export.
 
 The lecturer removed the K-Means and Naive Bayes requirements from the current working scope. The official `part b instructions.md` still includes those older requirements, but the lecturer update overrides them for the working notebook.
 
-The notebook currently implements the Decision Tree, MLP, and model comparison sections. It does **not** yet implement:
+The notebook currently implements the Decision Tree, MLP, and model comparison sections. Section 11 contains the current model-selection explanation, but the selection still has a highlighted reminder to confirm it after the lecturer's email. The notebook does **not** yet implement:
 
-- Final selected model
+- Final full-data retraining of the selected model
 - Final prediction export
 
 Do not reintroduce full K-Means or Naive Bayes sections unless explicitly requested. Section 10 now includes only a short conceptual answer explaining why supervised models (`Decision Tree` / `Neural Network`) are preferred over `K-Means` for this classification task, while the numerical comparison remains only between `Decision Tree` and `MLP`.
 
-Decision Tree section cleanup still needed later:
+Current draft reminders still present in the notebook:
 
-- Remove the draft Markdown note `shi changed the code below` / `שי שינתה את הקוד למטה`.
-- Remove or rewrite the placeholder blockquote text `Add blockquote`.
-- Rerun Section 8 through Section 10 after the latest Decision Tree tuning changes so saved outputs, Markdown conclusions, and Section 10 comparison values are fully synchronized.
+- Section 11 heading contains `<mark> לעדכן אחרי מייל משירי`.
+- Section 12 contains `<mark> אחרי שניצור קובץ חיזויים, צריך לעדכן <mark>`.
+- Remove these reminders only after the model choice is confirmed and the final prediction workflow is implemented.
+
+The old draft texts `shi changed the code below` and `Add blockquote` are no longer present.
+
+All code-cell outputs are currently cleared from the saved notebook. A complete temporary execution was used for verification without writing generated outputs back into the submitted notebook.
 
 ---
 
@@ -279,7 +284,7 @@ Full Decision Tree:
 DecisionTreeClassifier(random_state=42)
 ```
 
-Saved notebook output for the full tree:
+Latest verified output for the full tree:
 
 ```text
 Train Accuracy: 1.0000
@@ -298,7 +303,7 @@ Decision Tree tuning currently includes:
 - One-dimensional sweeps for `min_samples_split` and `min_samples_leaf`.
 - A combined 4D scan over `max_depth`, sampled `ccp_alpha`, `min_samples_split`, and `min_samples_leaf`.
 
-Important current state: the Decision Tree code was recently changed again. The current code uses a wider 4D search:
+The current Decision Tree code uses this expanded 4D search:
 
 ```text
 depth_options = [6, 8, 9, 10, 12]
@@ -307,7 +312,7 @@ min_samples_leaf_options = [15, 25, 35, 45]
 sampled ccp_alpha values from cost-complexity path
 ```
 
-The latest written Markdown in Section 8 says the improved combined search found:
+The code, Hebrew Markdown conclusions, and latest full verification run agree on these results:
 
 ```text
 Best max_depth from pre-pruning scan: 8
@@ -324,18 +329,6 @@ Optimal min_samples_leaf: 25
 Validation Accuracy: 0.8917
 ```
 
-However, some saved notebook outputs are still stale and show an older 4D-search result:
-
-```text
-Optimal max_depth: 9
-Optimal ccp_alpha: 0.000385
-Optimal min_samples_split: 30
-Optimal min_samples_leaf: 5
-Validation Accuracy: 0.8889
-```
-
-Before final reporting or implementing Section 11, rerun Section 8 through Section 10 so the code outputs, tables, plots, and Markdown conclusions all match the latest Decision Tree search.
-
 The currently selected best tree is trained dynamically with:
 
 ```python
@@ -348,18 +341,18 @@ DecisionTreeClassifier(
 )
 ```
 
-Saved notebook output currently visible for the selected pruned tree, before a full rerun:
+Latest verified selected-tree metrics:
 
 ```text
-Train Accuracy: 0.9118
-Train Precision: 0.9100
-Train Recall: 0.8854
-Train F1: 0.8975
+Train Accuracy: 0.9036
+Train Precision: 0.8979
+Train Recall: 0.8790
+Train F1: 0.8884
 
-Validation Accuracy: 0.8889
-Validation Precision: 0.8835
-Validation Recall: 0.8588
-Validation F1: 0.8710
+Validation Accuracy: 0.8917
+Validation Precision: 0.8863
+Validation Recall: 0.8626
+Validation F1: 0.8743
 ```
 
 Report-ready Decision Tree outputs currently included:
@@ -390,7 +383,7 @@ Prediction: Satisfied
 Correct classification: Yes
 ```
 
-Plot display text is intentionally in English because Hebrew RTL rendering in Matplotlib is unreliable. Notebook Markdown explanations remain in Hebrew.
+All code-generated Decision Tree output is in English. Notebook Markdown explanations remain in Hebrew and RTL.
 
 ---
 
@@ -481,7 +474,7 @@ Validation Recall: 0.8524
 Validation F1: 0.8634
 ```
 
-The notebook currently has no saved outputs for the MLP code cells, so these values should be verified after rerunning the notebook. The written conclusion is that the tuned MLP slightly improves validation accuracy and reduces overfitting compared with the default MLP.
+These MLP values were confirmed in the latest complete verification run. The tuned MLP slightly improves validation accuracy and reduces overfitting compared with the default MLP.
 
 Report-ready MLP outputs currently included:
 
@@ -491,9 +484,9 @@ Report-ready MLP outputs currently included:
 - Tuning plot.
 - Tuned MLP metrics table.
 - Tuned MLP confusion matrix.
-- Short Hebrew conclusions comparing default and tuned MLP.
+- Hebrew Markdown interpretation plus an English code-generated conclusion comparing default and tuned MLP.
 
-Plot display text is intentionally in English because Hebrew RTL rendering in Matplotlib is unreliable. Notebook Markdown explanations remain in Hebrew.
+All code-generated display text is intentionally in English, including tables, print messages, automatic conclusions, plot titles, axes, legends, and class labels. Notebook Markdown explanations remain in Hebrew and use RTL/right-aligned wrappers.
 
 ---
 
@@ -519,7 +512,7 @@ best_hidden_layers
 ```
 
 4. A grouped validation metrics plot comparing `Accuracy`, `Precision`, `Recall`, and `F1`.
-5. Hebrew conclusion naming `Decision Tree` as the current temporary leader based on validation behavior, while deferring the official final model choice to Section 11.
+5. Hebrew conclusion selecting `Decision Tree` as the current leader based on validation behavior, with the formal explanation continued in Section 11.
 
 Important rules for Section 10:
 
@@ -529,9 +522,19 @@ Important rules for Section 10:
 - Keep the conceptual K-Means answer brief and connected to the assignment question: K-Means is unsupervised and does not learn directly from `satisfaction`, while DT/NN are supervised classifiers.
 - Keep plot text in English and Markdown explanations in Hebrew.
 
-Current caveat:
+Latest verified comparison:
 
-- Because Section 8 Decision Tree tuning was changed recently, Section 10 should be rerun after Section 8 and Section 9 so the comparison table reflects the latest `best_dt_metrics`.
+```text
+Decision Tree Validation Accuracy: 0.8917
+Decision Tree Validation F1: 0.8743
+Decision Tree Generalization Gap: 0.0119
+
+MLP Validation Accuracy: 0.8883
+MLP Validation F1: 0.8714
+MLP Generalization Gap: 0.0378
+```
+
+The current comparison therefore selects the optimized Decision Tree as the provisional final model.
 
 ---
 
@@ -571,6 +574,8 @@ Rationale:
 - Never impute the target.
 - Keep all Markdown explanations, interpretations, and conclusions in Hebrew.
 - Keep code in normal Python.
+- Keep all user-visible output generated by code in English: table headers and row labels, print messages, automatic conclusions, validation/error messages, plot titles, axes, legends, and class labels.
+- Hebrew may remain in Markdown cells and code comments, but not in code-generated output.
 - Avoid long English explanations in Markdown cells.
 - Keep the solution clear enough to explain in class.
 
@@ -578,19 +583,22 @@ Rationale:
 
 ## Required Part B Sections To Add Later
 
-Remaining sections to add with Hebrew explanations:
+Remaining work:
 
-1. Final selected model.
-2. Final prediction export.
+1. Confirm the provisional Decision Tree choice after the lecturer's email and remove the highlighted reminder in Section 11.
+2. Retrain the confirmed final model on all cleaned training data.
+3. Generate predictions for `X_test_final` without changing its row count or order.
+4. Export and validate the final Excel prediction file.
+5. Replace the highlighted placeholder text in Section 12 with the actual completed results.
 
 The Decision Tree, Neural Network / MLP, and model comparison sections are already implemented.
 
 Do not add full K-Means or Naive Bayes sections under the current lecturer-updated scope. The old official instructions still mention them, but the current working notebook follows the lecturer update that removed those sections.
 
-Required outputs still needed for the report should include:
+Required outputs still needed for the report include:
 
-- Selected final model configuration.
-- Final validation confusion matrix for the selected model.
+- Confirmation of the final selected model after the pending lecturer clarification.
+- Final full-training and prediction summary.
 - Final submission Excel file.
 
 ---
@@ -624,9 +632,29 @@ assert set(submission["target"].unique()).issubset({0, 1})
 
 ---
 
+## Latest Verification Status
+
+The current notebook was executed completely from top to bottom in a temporary copy after translating code-generated output to English.
+
+Verified:
+
+- Full execution completed successfully.
+- All 37 Markdown cells remained unchanged during the cosmetic output-language edit.
+- Preprocessing logic, model logic, data split, hyperparameters, and metrics remained unchanged.
+- No Hebrew appeared in executed code outputs.
+- Training rows after cleaning: `8998`.
+- Split sizes: `7198` training rows and `1800` validation rows.
+- Final test rows: `1000`, with row count and order preserved.
+- Optimized Decision Tree validation Accuracy: `0.8917`.
+- Tuned MLP validation Accuracy: `0.8883`.
+
+The temporary execution result was used only for verification. The saved notebook currently contains no stored code-cell outputs.
+
+---
+
 ## Git / Branch Notes
 
-The current working branch is intended for ongoing work. Recent changes were pushed to `main`, and a local branch named `elad` was created for separate work.
+At the time of this context update, the repository is on branch `main`, tracking `origin/main`. A branch named `elad` was used earlier for separate work, so always run `git status -sb` before committing or pushing.
 
 The local reference notebook:
 
@@ -634,4 +662,4 @@ The local reference notebook:
 Airline_Project_Part_B_Group3 (3).ipynb
 ```
 
-has intentionally not been pushed as part of the final notebook workflow unless explicitly requested.
+was used earlier as a local reference for corrected Part A preprocessing and is not part of the final single-notebook submission. It may not be present on every branch or clone.
