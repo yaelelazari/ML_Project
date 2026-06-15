@@ -57,17 +57,18 @@ Do not require intermediate cleaned CSV files such as `Xy_train_clean.csv` or `X
 8. Implemented Neural Network / MLP section.
 9. Implemented model comparison section.
 10. Implemented selected-model section choosing the optimized Decision Tree.
-11. Implemented final retraining, prediction, validation, and Excel export section.
+11. Implemented bonus subgroup-performance analysis on the validation set.
+12. Implemented final retraining, prediction, validation, and Excel export section.
 
 The lecturer removed the K-Means and Naive Bayes requirements from the current working scope. The official `part b instructions.md` still includes those older requirements, but the lecturer update overrides them for the working notebook.
 
-The notebook currently implements the Decision Tree, MLP, model comparison, selected-model, and final-prediction sections. Section 11 selects the optimized Decision Tree, and Section 12 retrains it on all cleaned training data and exports the final predictions.
+The notebook currently implements the Decision Tree, MLP, model comparison, selected-model, bonus-analysis, and final-prediction sections. Section 11 selects the optimized Decision Tree, the bonus analysis examines subgroup behavior on validation data, and Section 12 retrains the tree on all cleaned training data and exports the final predictions.
 
 Do not reintroduce full K-Means or Naive Bayes sections unless explicitly requested. Section 10 now includes only a short conceptual answer explaining why supervised models (`Decision Tree` / `Neural Network`) are preferred over `K-Means` for this classification task, while the numerical comparison remains only between `Decision Tree` and `MLP`.
 
 The previous draft reminders in Sections 11 and 12 have been removed. The old draft texts `shi changed the code below` and `Add blockquote` are also no longer present.
 
-All code-cell outputs are currently cleared from the saved notebook. A complete temporary execution was used for verification without writing generated outputs back into the submitted notebook.
+The saved notebook currently contains code-cell outputs from a recent user execution. Independent temporary executions are also used for verification so tests do not overwrite the submitted notebook or final prediction file.
 
 ---
 
@@ -529,6 +530,43 @@ The current comparison therefore selects the optimized Decision Tree as the prov
 
 ---
 
+## Current General Bonus Analysis
+
+A bonus section was added between Sections 11 and 12. It analyzes the selected Decision Tree only on the validation set and does not use `X_test_final`.
+
+The section reports subgroup metrics by:
+
+- `Type of Travel`.
+- `Customer Type`.
+
+For each group it displays the number of records, number of truly satisfied passengers, Accuracy, Recall for the `Satisfied` class, false negatives, and false positives. A report-ready plot compares Accuracy with Satisfied Recall by travel type.
+
+Main verified finding:
+
+```text
+Personal Travel:
+Records: 546
+Actual Satisfied: 56
+Accuracy: 0.9432
+Satisfied Recall: 0.4643
+False Negatives: 30
+
+Business travel:
+Records: 1254
+Actual Satisfied: 730
+Accuracy: 0.8692
+Satisfied Recall: 0.8932
+False Negatives: 78
+```
+
+The high Accuracy for personal travel hides weak identification of satisfied passengers: only 46.43% were detected correctly. This occurs because the subgroup is strongly dominated by neutral/dissatisfied passengers.
+
+A secondary finding is that Satisfied Recall is `0.6389` for disloyal customers versus `0.8852` for loyal customers. The Hebrew conclusion explains that overall Accuracy should be supplemented with subgroup Recall when evaluating practical model performance.
+
+All bonus tables and plot labels are in English; interpretation remains in Hebrew Markdown and RTL.
+
+---
+
 ## Train/Validation Split
 
 Part B requires splitting `Xy_train.csv` into training and validation sets.
@@ -580,9 +618,10 @@ Implemented under the current lecturer-updated scope:
 2. Decision Tree training, tuning, evaluation, visualization, and interpretation.
 3. MLP training, tuning, cross-validation, evaluation, and interpretation.
 4. Model comparison and selection of the optimized Decision Tree.
-5. Full-data retraining of the selected model.
-6. Prediction on `X_test_final` with row count and order preserved.
-7. Export and validation of the final Excel prediction file.
+5. Bonus subgroup-performance analysis on the validation set.
+6. Full-data retraining of the selected model.
+7. Prediction on `X_test_final` with row count and order preserved.
+8. Export and validation of the final Excel prediction file.
 
 No additional notebook modeling section remains under the current scope. Final review and submission packaging are still required outside the implementation itself.
 
@@ -650,12 +689,12 @@ assert set(submission["target"].unique()).issubset({0, 1})
 
 ## Latest Verification Status
 
-The current notebook was executed completely from top to bottom in a temporary copy after implementing Section 12.
+The notebook was executed completely after implementing Section 12, and a second temporary execution through the newly added bonus section verified the subgroup analysis.
 
 Verified:
 
 - Full execution completed successfully.
-- The notebook contains 38 Markdown cells and 38 code cells.
+- The notebook contains 40 Markdown cells and 39 code cells.
 - Preprocessing logic, model logic, data split, hyperparameters, and metrics remained unchanged.
 - No Hebrew appeared in executed code outputs.
 - Training rows after cleaning: `8998`.
@@ -663,18 +702,20 @@ Verified:
 - Final test rows: `1000`, with row count and order preserved.
 - Optimized Decision Tree validation Accuracy: `0.8917`.
 - Tuned MLP validation Accuracy: `0.8883`.
+- Bonus travel-type and customer-type tables matched the documented subgroup findings.
+- Bonus code-generated output contains no Hebrew; the plot labels are in English.
 - Section 12 retrained the optimized Decision Tree on all `8998` cleaned training rows.
 - `airline_G3_ytest.xlsx` was created successfully with `1000` rows and one `target` column.
 - Final test row count and order were preserved.
 - The exported Excel file matched the in-memory submission exactly.
 
-The temporary execution result was used only for verification. The saved notebook currently contains no stored code-cell outputs.
+The temporary execution result was used only for verification. The saved notebook retains its existing stored code-cell outputs.
 
 ---
 
 ## Git / Branch Notes
 
-At the time of this context update, the repository is on branch `elad`, tracking `origin/elad`. Always run `git status -sb` before committing or pushing.
+At the time of this context update, the repository is on branch `main`, tracking `origin/main`. Always run `git status -sb` before committing or pushing.
 
 The local reference notebook:
 
