@@ -34,7 +34,6 @@ Raw notebook inputs in the project folder:
 ```text
 Xy_train.csv
 X_test.csv
-y test example.xlsx
 ```
 
 Supporting material:
