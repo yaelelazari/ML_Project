@@ -10,18 +10,20 @@ The submitted code artifact is:
 Airline_Project_Part_B_Group3.ipynb
 ```
 
-The notebook must run from top to bottom from the raw project files, perform the corrected Part A cleaning internally, train and compare the required models, select a final model, and export predictions.
+The notebook runs from the raw project files, performs corrected Part A cleaning internally, trains and compares the required models, selects a final model, and exports predictions.
 
 ## Current Scope Decision
 
 The official `part b instructions.md` still mentions K-Means and Naive Bayes. The lecturer subsequently removed both from the required scope. This documented lecturer decision takes precedence for the current project.
+
+F1 is the leading metric for hyperparameter tuning and final model selection. The methodological reason is that F1 balances Precision and Recall for the positive class (`satisfied`), so it evaluates both the ability to identify satisfied passengers and the reliability of positive predictions. Accuracy is still reported because the classes are moderately balanced, about 56% / 44%, but it is not the primary selection metric.
 
 Required modeling scope:
 
 - Decision Tree.
 - MLP / Neural Network.
 - Hyperparameter tuning and Cross-Validation.
-- Model comparison and final selection.
+- Model comparison and final selection using F1.
 - Final test prediction export.
 - Optional subgroup analysis for bonus consideration.
 
@@ -87,7 +89,7 @@ The stratified split uses `test_size=0.2` and `random_state=42`. Class proportio
 
 ## Leakage-Safe Cleaning
 
-Cleaning is implemented by the sklearn-compatible transformer `AirlinePartACleaner`, derived from `BaseEstimator` and `TransformerMixin`.
+Cleaning is implemented by `AirlinePartACleaner`, an sklearn-compatible transformer derived from `BaseEstimator` and `TransformerMixin`.
 
 `fit()` learns only from the rows supplied to it:
 
@@ -98,12 +100,12 @@ Cleaning is implemented by the sklearn-compatible transformer `AirlinePartAClean
 - Remaining numeric medians.
 - Remaining categorical modes.
 
-`transform()` applies the stored values without recomputing them and never removes rows.
+`transform()` applies stored values without recomputing them and never removes rows.
 
-Additional cleaning behavior:
+Additional behavior:
 
-- Missing and `Unknown` Class values become `Business` inside the transformer.
-- Invalid test Class values, if present, are treated as missing and become `Business`.
+- Missing and `Unknown` Class values become `Business`.
+- Invalid final-test Class values, if present, are treated as missing and become `Business`.
 - `Plane colors` is dropped.
 - `Age_Category`, `Flight_Type`, and `Total_Service_Score` are created.
 - `Flight_Type` uses fixed bins `[0, 1000, 3000, np.inf]`.
@@ -129,9 +131,9 @@ Global Flight Distance median: 853.5
 
 No `fit` call is made on `X_valid` or `X_test`.
 
-## Decision Tree Pipeline And Results
+## Decision Tree Results
 
-Pipeline:
+Modeling process:
 
 ```text
 AirlinePartACleaner
@@ -140,21 +142,21 @@ AirlinePartACleaner
 -> DecisionTreeClassifier
 ```
 
-Decision Tree Cross-Validation uses:
+Decision Tree tuning uses:
 
 ```python
 StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 ```
 
-The one-dimensional plots report Mean CV Accuracy, not validation-set accuracy.
+The one-dimensional plots report Mean CV F1, not validation-set performance.
 
-Verified one-dimensional results:
+Verified one-dimensional F1 results:
 
 ```text
-Best max_depth: 8; Mean CV Accuracy: 0.8789
-Best ccp_alpha: 0.000857; Mean CV Accuracy: 0.8889
-Best min_samples_split: 97; Mean CV Accuracy: 0.8832
-Best min_samples_leaf: 15; Mean CV Accuracy: 0.8871
+Best max_depth: 8; Mean CV F1: 0.8585
+Best ccp_alpha: 0.000857; Mean CV F1: 0.8708
+Best min_samples_split: 97; Mean CV F1: 0.8637
+Best min_samples_leaf: 15; Mean CV F1: 0.8688
 ```
 
 The combined search grid remains:
@@ -173,17 +175,17 @@ max_depth: 12
 ccp_alpha: 0.00038492671497453553
 min_samples_split: 30
 min_samples_leaf: 15
-Best 5-fold Mean CV Accuracy: 0.8891
+Best 5-fold Mean CV F1: 0.8711
 ```
 
 Full tree baseline:
 
 ```text
-Train fit Accuracy: 1.0000
-5-fold CV Accuracy: 0.8569
-5-fold CV Precision: 0.8393
-5-fold CV Recall: 0.8313
-5-fold CV F1: 0.8352
+Train Accuracy/F1: 1.0000 / 1.0000
+Validation Accuracy: 0.8478
+Validation Precision: 0.8216
+Validation Recall: 0.8321
+Validation F1: 0.8268
 ```
 
 Selected Decision Tree metrics:
@@ -198,7 +200,6 @@ Validation Accuracy: 0.8828
 Validation Precision: 0.8808
 Validation Recall: 0.8461
 Validation F1: 0.8631
-Generalization gap: 0.0304
 Confusion matrix: [[924, 90], [121, 665]]
 ```
 
@@ -214,9 +215,9 @@ Customer Type_Loyal Customer: 0.1338
 Cleanliness: 0.0795
 ```
 
-## MLP Pipeline And Results
+## MLP Results
 
-Pipeline:
+Modeling process:
 
 ```text
 AirlinePartACleaner
@@ -233,7 +234,7 @@ MLP tuning uses:
 StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
 ```
 
-Three folds are documented as a compromise between estimate stability and neural-network runtime. The search keeps the existing architecture space and two alpha values.
+Three folds are documented as a compromise between estimate stability and neural-network runtime. The search keeps the existing architecture space and two alpha values, but now optimizes F1.
 
 Default MLP baseline:
 
@@ -254,64 +255,61 @@ The default MLP reaches `max_iter=500` without full convergence. It is retained 
 Verified selected MLP configuration:
 
 ```text
-hidden_layer_sizes: (50, 25, 10)
+hidden_layer_sizes: (150,)
 activation: relu
-alpha: 0.001
+alpha: 0.0001
 learning_rate_init: 0.001
-Best 3-fold Mean CV Accuracy: 0.8927
+Best 3-fold Mean CV F1: 0.8739
 ```
 
 Selected MLP metrics:
 
 ```text
-Train Accuracy: 0.9398
-Train Precision: 0.9436
-Train Recall: 0.9169
-Train F1: 0.9301
+Train Accuracy: 0.9225
+Train Precision: 0.9151
+Train Recall: 0.9064
+Train F1: 0.9107
 
-Validation Accuracy: 0.8828
-Validation Precision: 0.8778
-Validation Recall: 0.8499
-Validation F1: 0.8636
-Generalization gap: 0.0571
-Confusion matrix: [[921, 93], [118, 668]]
+Validation Accuracy: 0.8856
+Validation Precision: 0.8826
+Validation Recall: 0.8511
+Validation F1: 0.8666
+Confusion matrix: [[925, 89], [117, 669]]
 ```
-
-Accuracy is the primary metric because the class balance is moderate, about 56% / 44%. Precision, Recall, and F1 are also reported to detect class-specific weaknesses.
 
 ## Model Comparison And Selection
 
-The Decision Tree and MLP have exactly the same validation Accuracy: `0.882777...`, displayed as `0.8828`.
+Final selection prioritizes validation F1 because it balances precision and recall for the positive class.
 
 Comparison:
 
 ```text
-Decision Tree: Precision 0.8808, Recall 0.8461, F1 0.8631, gap 0.0304
-MLP:           Precision 0.8778, Recall 0.8499, F1 0.8636, gap 0.0571
+Decision Tree: Accuracy 0.8828, Precision 0.8808, Recall 0.8461, F1 0.8631, gap 0.0304
+MLP:           Accuracy 0.8856, Precision 0.8826, Recall 0.8511, F1 0.8666, gap 0.0369
 ```
 
-Because validation Accuracy is tied, validation F1 is used as the tie-breaker. The selected final model is the tuned MLP. The notebook explicitly notes that the margin is very small and that the Decision Tree remains more interpretable and has a smaller generalization gap.
+The selected final model is the tuned MLP. The MLP has higher validation F1 and slightly higher validation Accuracy, Precision, and Recall. The Decision Tree remains more interpretable and has a slightly smaller generalization gap.
 
 ## Bonus Subgroup Analysis
 
-The subgroup analysis uses the selected MLP's validation predictions. Grouping columns are taken from `X_valid` after applying the selected pipeline's already-fitted cleaner, so missing category values are handled consistently and no extra `NaN` subgroup remains.
+The subgroup analysis uses the selected MLP's validation predictions. Grouping columns are taken from `X_valid` after applying the selected model's already-fitted cleaner, so missing category values are handled consistently.
 
 The analysis is descriptive only and is not used for further tuning.
 
-Verified subgroup findings after applying the selected cleaner:
+Verified subgroup findings:
 
 ```text
-Personal Travel: 546 records, 56 satisfied, Accuracy 0.9121, Satisfied Recall 0.4643, 30 false negatives
-Business Travel: 1254 records, 730 satisfied, Accuracy 0.8700, Satisfied Recall 0.8795, 88 false negatives
-Disloyal Customer: 320 records, 72 satisfied, Accuracy 0.8563, Satisfied Recall 0.6111, 28 false negatives
-Loyal Customer: 1480 records, 714 satisfied, Accuracy 0.8885, Satisfied Recall 0.8739, 90 false negatives
+Personal Travel: 546 records, 56 satisfied, Accuracy 0.9158, Satisfied Recall 0.4107, 33 false negatives
+Business Travel: 1254 records, 730 satisfied, Accuracy 0.8724, Satisfied Recall 0.8849, 84 false negatives
+Disloyal Customer: 320 records, 72 satisfied, Accuracy 0.8344, Satisfied Recall 0.5278, 34 false negatives
+Loyal Customer: 1480 records, 714 satisfied, Accuracy 0.8966, Satisfied Recall 0.8838, 83 false negatives
 ```
 
 `Bonus_Table.png` is regenerated from the current subgroup plot when the notebook runs.
 
 ## Final Prediction Export
 
-The final MLP pipeline is rebuilt from the selected hyperparameters and fitted to all 8,998 eligible raw labeled rows. Its cleaner learns only from those rows. The untouched 1,000-row final test frame is passed to `predict` in original order.
+The final MLP training and prediction process is rebuilt from the selected hyperparameters and fitted to all 8,998 eligible raw labeled rows. Its cleaner learns only from those rows. The untouched 1,000-row final test frame is passed to `predict` in original order.
 
 Verified output file:
 
@@ -321,18 +319,18 @@ Rows: 1000
 Columns: 1
 Column name: target
 Missing values: 0
-Class 0 predictions: 580 (58.0%)
-Class 1 predictions: 420 (42.0%)
+Class 0 predictions: 595 (59.5%)
+Class 1 predictions: 405 (40.5%)
 ```
 
 The file is read back and compared with the in-memory submission. If Excel locks the target file, the notebook reports an environmental issue and validates a temporary Excel file instead.
 
-Compared with the previous submission file:
+Compared with the snapshot before switching tuning to F1:
 
 ```text
-Changed predictions: 81
-0 -> 1 changes: 37
-1 -> 0 changes: 44
+Changed predictions: 51
+0 -> 1 changes: 18
+1 -> 0 changes: 33
 ```
 
 ## Verified Notebook Status
@@ -341,15 +339,16 @@ Latest full execution:
 
 - 39 code cells executed with sequential counts 1 through 39.
 - No cell errors.
-- 40 Markdown cells.
 - All transformed train, validation, and test frames contain 23 features and zero missing values.
 - No fitting on validation or final test data.
 - No use of `X_valid` inside Decision Tree or MLP hyperparameter tuning.
+- Decision Tree and MLP tuning both optimize F1.
+- Final model selection uses Validation F1.
 - Final test row count and order preserved.
 - Final Excel export passed all structural checks.
 - Raw source CSV hashes remain unchanged.
 
-Environment-only messages observed during independent execution:
+Environment-only messages observed during execution:
 
 - The default MLP emitted a convergence warning at 500 iterations.
 - Joblib on Windows emitted resource-tracker cleanup messages after parallel work completed.
@@ -360,10 +359,6 @@ Environment-only messages observed during independent execution:
 - Markdown explanations and conclusions remain in Hebrew with RTL wrappers.
 - Code and code-generated table/plot labels remain in English.
 - Conclusions must match saved outputs exactly.
-- Explain that Cross-Validation is training-only and the validation set is held out until tuning is complete.
-- Do not claim that execution alone proves methodological correctness.
+- Explain that F1 is the leading metric because it balances Precision and Recall for the positive class.
+- Explain that Accuracy remains informative because the class distribution is moderately balanced.
 - Keep the notebook suitable for classroom presentation and final report use.
-
-## Git Notes
-
-At the latest check, the working branch was `elad`, tracking `origin/elad`. Always verify with `git status --short --branch` before committing.
